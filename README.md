@@ -23,10 +23,10 @@ One line installs Claude Command Center, adds Ski and opens it. The rest of
 Claude Command Center stays out of the way behind a "More" button.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/amirfish1/claude-command-center/main/scripts/install.sh | CCC_APP=OWNER/ccc-ski bash
+curl -fsSL https://raw.githubusercontent.com/amirfish1/claude-command-center/main/scripts/install.sh | CCC_APP=amirfish1/ccc-ski bash
 ```
 
-Already have Claude Command Center? Run `ccc app install OWNER/ccc-ski --focus`
+Already have Claude Command Center? Run `ccc app install amirfish1/ccc-ski --focus`
 (leave out `--focus` to keep your usual view).
 
 You also need an agent it can start, for example Claude Code. The page works
