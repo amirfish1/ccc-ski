@@ -1,0 +1,188 @@
+[
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2026-11-20",
+    "checkout": "2026-11-22",
+    "id": "2026-11-20"
+  },
+  {
+    "kind": "holiday",
+    "label": "Thanksgiving",
+    "checkin": "2026-11-27",
+    "checkout": "2026-11-29",
+    "note": "Thanksgiving weekend. Thanksgiving Day is Thu Nov 26. Check the resort's opening date.",
+    "id": "2026-11-27"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2026-12-04",
+    "checkout": "2026-12-06",
+    "id": "2026-12-04"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2026-12-11",
+    "checkout": "2026-12-13",
+    "id": "2026-12-11"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2026-12-18",
+    "checkout": "2026-12-20",
+    "id": "2026-12-18"
+  },
+  {
+    "kind": "holiday",
+    "label": "Christmas",
+    "checkin": "2026-12-23",
+    "checkout": "2026-12-25",
+    "note": "Ski Dec 24 and 25. Dec 26-30 is an Ikon blackout. Change if you want to be home.",
+    "id": "2026-12-23"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2026-12-25",
+    "checkout": "2026-12-27",
+    "id": "2026-12-25"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-01-01",
+    "checkout": "2027-01-03",
+    "id": "2027-01-01"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-01-08",
+    "checkout": "2027-01-10",
+    "id": "2027-01-08"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-01-15",
+    "checkout": "2027-01-17",
+    "id": "2027-01-15"
+  },
+  {
+    "kind": "holiday",
+    "label": "Martin Luther King",
+    "checkin": "2027-01-17",
+    "checkout": "2027-01-19",
+    "note": "MLK Day is Mon Jan 18.",
+    "id": "2027-01-17"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-01-22",
+    "checkout": "2027-01-24",
+    "id": "2027-01-22"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-01-29",
+    "checkout": "2027-01-31",
+    "id": "2027-01-29"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-02-05",
+    "checkout": "2027-02-07",
+    "id": "2027-02-05"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-02-12",
+    "checkout": "2027-02-14",
+    "id": "2027-02-12"
+  },
+  {
+    "kind": "holiday",
+    "label": "February ski week",
+    "checkin": "2027-02-16",
+    "checkout": "2027-02-19",
+    "note": "Presidents' Day is Mon Feb 15. Tue to Fri, three nights.",
+    "id": "2027-02-16"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-02-19",
+    "checkout": "2027-02-21",
+    "id": "2027-02-19"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-02-26",
+    "checkout": "2027-02-28",
+    "id": "2027-02-26"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-03-05",
+    "checkout": "2027-03-07",
+    "id": "2027-03-05"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-03-12",
+    "checkout": "2027-03-14",
+    "id": "2027-03-12"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-03-19",
+    "checkout": "2027-03-21",
+    "id": "2027-03-19"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-03-26",
+    "checkout": "2027-03-28",
+    "id": "2027-03-26"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-04-02",
+    "checkout": "2027-04-04",
+    "id": "2027-04-02"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-04-09",
+    "checkout": "2027-04-11",
+    "id": "2027-04-09"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-04-16",
+    "checkout": "2027-04-18",
+    "id": "2027-04-16"
+  },
+  {
+    "kind": "weekend",
+    "label": "Weekend",
+    "checkin": "2027-04-23",
+    "checkout": "2027-04-25",
+    "id": "2027-04-23"
+  }
+]

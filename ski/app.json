@@ -1,0 +1,89 @@
+{
+  "label": "Ski",
+  "icon": "⛷",
+  "tz": "America/Los_Angeles",
+  "topic": {
+    "parts": [
+      {
+        "id": "snow",
+        "label": "Snow forecast",
+        "status": "live",
+        "how": "Palisades Tahoe, from the US weather service, each time you open this page"
+      },
+      {
+        "id": "pass",
+        "label": "Pass blackout dates",
+        "status": "live",
+        "how": "Ikon Base Pass dates for this season; confirm them on the pass page"
+      },
+      {
+        "id": "trips",
+        "label": "Trip dates",
+        "status": "live",
+        "how": "Every weekend to the end of April plus Thanksgiving, Christmas, MLK and February ski week"
+      },
+      {
+        "id": "lodging",
+        "label": "Where to stay",
+        "status": "live",
+        "how": "20 hotels, condos and rentals near Palisades, filterable by area and points program"
+      },
+      {
+        "id": "search",
+        "label": "Hotel search",
+        "status": "todo",
+        "how": "Installs itself the first time the app runs. Then ask the agent to search a weekend."
+      },
+      {
+        "id": "cancel",
+        "label": "Cancel reminders",
+        "status": "live",
+        "how": "The Hotel Canceller checks every morning once you record a booking"
+      }
+    ]
+  },
+  "suggestions": [
+    {
+      "label": "Change a weekend's dates",
+      "prompt": "Change the dates of this weekend: "
+    },
+    {
+      "label": "Change who is going",
+      "prompt": "Change who is going. The people or groups I want a column for are: "
+    },
+    {
+      "label": "Record a booking",
+      "prompt": "I booked a place. Record it and remind me before free cancellation ends. Hotel, dates, price and free-cancel date: "
+    },
+    {
+      "label": "Search for hotels",
+      "prompt": "Search for places to stay for this weekend, with this many guests and this budget per night: "
+    }
+  ],
+  "routines": [
+    {
+      "id": "setup",
+      "name": "Setup",
+      "icon": "🧰",
+      "does": "Installs the hotel search tools. Runs once.",
+      "kind": "script",
+      "run": [
+        "python3",
+        "setup.py"
+      ],
+      "setup": true
+    },
+    {
+      "id": "hotel-canceller",
+      "name": "Hotel Canceller",
+      "icon": "🛎",
+      "does": "Warns you before a hotel booking stops being refundable.",
+      "schedule": "daily 08:00",
+      "kind": "script",
+      "run": [
+        "python3",
+        "hotel_canceller.py"
+      ]
+    }
+  ]
+}

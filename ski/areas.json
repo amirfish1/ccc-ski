@@ -1,0 +1,50 @@
+{
+  "_about": "Search areas for hotel_search.py. 'query' is what Google Hotels is asked; 'box' is the Airbnb map box as [north-east lat, north-east lng, south-west lat, south-west lng]; 'zoom' is the Airbnb map zoom.",
+  "default": "valley",
+  "areas": {
+    "valley": {
+      "label": "Olympic Valley (at the lifts)",
+      "query": "hotels Olympic Valley California",
+      "box": [
+        39.22,
+        -120.2,
+        39.18,
+        -120.26
+      ],
+      "zoom": 13
+    },
+    "tahoe-city": {
+      "label": "Tahoe City (4.5 miles)",
+      "query": "hotels Tahoe City California",
+      "box": [
+        39.19,
+        -120.11,
+        39.15,
+        -120.17
+      ],
+      "zoom": 13
+    },
+    "truckee": {
+      "label": "Truckee (12 miles)",
+      "query": "hotels Truckee California",
+      "box": [
+        39.35,
+        -120.14,
+        39.3,
+        -120.24
+      ],
+      "zoom": 12
+    },
+    "all": {
+      "label": "Everything within a short drive",
+      "query": "hotels near Palisades Tahoe",
+      "box": [
+        39.36,
+        -120.1,
+        39.15,
+        -120.3
+      ],
+      "zoom": 11
+    }
+  }
+}

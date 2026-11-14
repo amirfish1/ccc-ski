@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ski · CCC</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('ccc-theme')||'dark'}catch(_){}</script>
+<script src="/static/app-rail.js" defer></script>
+<script src="/static/app-kit.js" data-app="ski" defer></script>
+<style>
+:root{--bg:#0f1115;--panel:#161a21;--line:#2b323d;--text:#edf0f5;--muted:#a8b2c2;--accent:#80b9ff;--good:#8bd8ac;--warn:#f5c67c;--bad:#ff8f8f;--snow:128,185,255}
+[data-theme="light"]{--bg:#f5f6f8;--panel:#fff;--line:#d9dee6;--text:#1a1f29;--muted:#5d6878;--accent:#1f6fd0;--good:#1c8a50;--warn:#a26200;--bad:#c62828;--snow:31,111,208}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#dash{padding:24px 26px 60px}
+button.tab{font:inherit;font-size:13px;padding:5px 10px;border-radius:7px;border:1px solid var(--line);background:none;color:var(--muted);cursor:pointer;white-space:nowrap}
+button.tab:hover{color:var(--text);border-color:var(--accent)}
+button.tab:disabled{opacity:.6;cursor:default}
+h1{font-size:22px;margin:0 0 18px}
+h2{font-size:15px;margin:0 0 10px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.part{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.part .st{font-size:12px;font-weight:600;color:var(--warn)}
+.part .st.live{color:var(--good)}
+.part .lbl{font-weight:600;margin:2px 0}
+.muted{color:var(--muted);font-size:13px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted);font-weight:500}
+th:first-child,td:first-child{text-align:left}
+th.black{color:var(--bad)}
+tr:last-child td{border-bottom:0}
+.soon{color:var(--bad);font-weight:600}
+ul.dates{list-style:none;margin:0;padding:0}
+ul.dates li{padding:6px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}
+ul.dates li:last-child{border-bottom:0}
+ul.dates li.past{color:var(--muted);text-decoration:line-through}
+a{color:var(--accent)}
+textarea.note{width:100%;min-width:150px;font:inherit;font-size:13px;padding:5px 7px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--text);resize:vertical}
+select.nights{font:inherit;font-size:12px;margin-top:4px;padding:2px 4px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+textarea.note:focus{outline:none;border-color:var(--accent)}
+</style></head>
+<body>
+<main id="dash" data-ccc-content>
+  <h1>⛷ Ski <button type="button" class="tab" id="refresh" title="Reload this page and its data. The agent panel is not touched.">↻ Refresh</button></h1>
+  <div class="parts" id="parts"></div>
+  <section><h2 id="snowtitle">Snow in the next 7 days</h2><div id="snow" class="muted">Loading forecast…</div></section>
+  <section><h2 id="passtitle">Pass</h2><div id="pass" class="muted">Loading…</div></section>
+  <section><h2>Trips: usually two nights, ski two days</h2><div id="trips" class="muted">Loading…</div></section>
+  <section><h2 id="lodgingtitle">Where to stay</h2><div id="lodging" class="muted">Loading…</div></section>
+  <section><h2>Prices by weekend</h2><div id="prices" class="muted">Loading…</div></section>
+  <section><h2>Hotel bookings</h2><div id="hotels" class="muted">Loading…</div></section>
+  <section data-ccc-routines><h2>Routines</h2><p class="muted" style="margin:-4px 0 12px">Helpers that run on their own schedule and tell you when something needs you.</p></section>
+</main>
+<script>
+'use strict';
+const BASE='/app-static/ski/';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const getJSON=async u=>{const r=await fetch(u,{cache:'no-store',signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error(u+' '+r.status);return r.json()};
+const TZ='America/Los_Angeles';
+const dayKey=d=>d.toLocaleDateString('en-CA',{timeZone:TZ});
+const nice=k=>new Date(k+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+let blackouts=[],passName='pass';
+const isBlack=k=>blackouts.some(b=>k>=b.from&&k<=b.to);
+
+async function parts(){
+  const topic=(await getJSON(BASE+'app.json')).topic||{};
+  $('parts').innerHTML=(topic.parts||[]).map(p=>`<div class="part"><div class="st ${p.status==='live'?'live':''}">${p.status==='live'?'Live':'Not set up'}</div><div class="lbl">${esc(p.label)}</div><div class="muted">${esc(p.how)}</div></div>`).join('');
+}
+// ---- snow: the weather service reports snowfall in mm over 1-6 hour
+// periods and temperatures in C over half-day periods. Bucket each period
+// by the Pacific calendar day of its midpoint.
+const mid=vt=>{const [start,dur]=vt.split('/');const m=/P(?:(\d+)D)?(?:T(?:(\d+)H)?)?/.exec(dur||'')||[];const h=(+m[1]||0)*24+(+m[2]||0);return new Date(Date.parse(start)+h*18e5)};
+async function snow(){
+  const el=$('snow');
+  const resorts=await getJSON(BASE+'resorts.json');
+  const days=[...Array(7)].map((_,i)=>new Date(Date.now()+i*864e5));
+  const keys=days.map(dayKey);
+  if(resorts.length===1)$('snowtitle').textContent='Next 7 days at '+resorts[0].name;
+  const blocks=await Promise.all(resorts.map(async r=>{
+    try{
+      const p=(await getJSON('https://api.weather.gov/gridpoints/'+r.grid)).properties;
+      const sum={},hi={},lo={};
+      for(const v of p.snowfallAmount.values){const k=dayKey(mid(v.validTime));sum[k]=(sum[k]||0)+(v.value||0)/25.4}
+      const f=c=>Math.round(c*9/5+32);
+      for(const v of p.maxTemperature.values)if(v.value!=null)hi[dayKey(mid(v.validTime))]=f(v.value);
+      for(const v of p.minTemperature.values)if(v.value!=null)lo[dayKey(mid(v.validTime))]=f(v.value);
+      return {name:r.name,sum,hi,lo};
+    }catch(e){return {name:r.name,error:true}}
+  }));
+  const max=Math.max(1,...blocks.flatMap(b=>b.sum?keys.map(k=>b.sum[k]||0):[]));
+  const snowCell=v=>v==null?'<td class="muted">–</td>':`<td style="background:rgba(var(--snow),${(0.55*v/max).toFixed(2)})">${v<0.05?'0':v.toFixed(v<10?1:0)}</td>`;
+  const plain=v=>`<td>${v==null?'<span class="muted">–</span>':v+'°'}</td>`;
+  const head=`<tr><th></th>${days.map((d,i)=>`<th class="${isBlack(keys[i])?'black':''}" title="${isBlack(keys[i])?'Pass blackout day':''}">${d.toLocaleDateString('en-US',{timeZone:TZ,weekday:'short',day:'numeric'})}${isBlack(keys[i])?' ✕':''}</th>`).join('')}<th>Total</th></tr>`;
+  el.classList.remove('muted');
+  el.innerHTML=blocks.map(b=>b.error?`<p class="muted">${esc(b.name)}: forecast unavailable right now.</p>`:
+    `${blocks.length>1?`<h2>${esc(b.name)}</h2>`:''}<table><thead>${head}</thead><tbody>
+    <tr><td>Snow (in)</td>${keys.map(k=>snowCell(k in b.sum?b.sum[k]:null)).join('')}<td><b>${keys.reduce((a,k)=>a+(b.sum[k]||0),0).toFixed(1)}</b></td></tr>
+    <tr><td>High</td>${keys.map(k=>plain(b.hi[k])).join('')}<td></td></tr>
+    <tr><td>Low</td>${keys.map(k=>plain(b.lo[k])).join('')}<td></td></tr></tbody></table>`).join('');
+}
+
+async function pass(){
+  const p=await getJSON(BASE+'pass.json');blackouts=p.blackouts||[];passName=p.name||'pass';
+  const today=dayKey(new Date());
+  $('passtitle').textContent=p.name+(p.confirmed?'':' (to confirm)')+': blackout dates';
+  $('pass').classList.remove('muted');
+  $('pass').innerHTML=`<ul class="dates">${blackouts.map(b=>{const past=b.to<today;const days=Math.ceil((Date.parse(b.from)-Date.parse(today))/864e5);return `<li class="${past?'past':''}"><span>${nice(b.from)} to ${nice(b.to)}</span><span class="muted">${past?'':days<=0?'now':'in '+days+' days'}</span></li>`}).join('')}</ul><p class="muted">${p.confirmed?'Confirmed':'From third-party listings'}${p.source?`; <a href="${esc(p.source)}" target="_blank" rel="noopener">check the pass page</a>`:''}.</p>`;
+}
+
+async function hotels(){
+  const el=$('hotels');
+  const list=(await getJSON(BASE+'bookings.json')).slice().sort((a,b)=>String(a.free_cancel_until).localeCompare(String(b.free_cancel_until)));
+  if(!list.length){el.textContent='No bookings yet.';return}
+  el.classList.remove('muted');
+  el.innerHTML=`<table><thead><tr><th>Hotel</th><th>Stay</th><th>Free cancel until</th><th>Days left</th></tr></thead><tbody>${list.map(b=>{const left=Math.ceil((Date.parse(b.free_cancel_until)-Date.now())/864e5);return `<tr><td>${esc(b.hotel)}</td><td>${esc(b.checkin)} → ${esc(b.checkout)}</td><td>${esc(b.free_cancel_until)}</td><td class="${left<=3?'soon':''}">${left<0?'passed':left}</td></tr>`}).join('')}</tbody></table>`;
+}
+
+// Each row: drive up Friday afternoon, ski the next two days, drive home
+// the second afternoon. Ski days are every date after check-in up to and
+// including check-out. Hotel columns and prices come next.
+async function trips(){
+  const el=$('trips');
+  const list=await getJSON(BASE+'trips.json');
+  // Who might come. One "going?" column per person or group; edit people.json
+  // to change them. Ticks are stored per person id.
+  let people=[];try{people=(await getJSON(BASE+'people.json')).filter(p=>p&&p.id)}catch(_){}
+  if(!people.length)people=[{id:'me',label:'Me'}];
+  const today=dayKey(new Date());
+  const add=(k,n)=>{const t=new Date(k+'T12:00:00');t.setDate(t.getDate()+n);return t.toLocaleDateString('en-CA')};
+  // Answers live on the server (/api/apps/data, file data/<key>.json in this
+  // app's folder) so every device and agent sees the same ticks. localStorage
+  // is only a fallback and the one-time source: if the server has nothing for
+  // a key yet, this browser's old answer is uploaded once.
+  const SKEYS=['ski-hidden-trips','ski-trip-book2','ski-trip-confirmed','ski-trip-notes','ski-trip-nights'];
+  const srv={};
+  const post=(key,v)=>{try{fetch('/api/apps/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'ski',key,value:v})}).catch(()=>{})}catch(_){}};
+  await Promise.all(SKEYS.map(async k=>{try{const r=await getJSON('/api/apps/data?app=ski&key='+k);
+    if(r.ok&&r.value!==null&&r.value!==undefined)srv[k]=r.value;
+    else if(r.ok){const l=localStorage.getItem(k);if(l){try{post(k,JSON.parse(l))}catch(_){}}}}catch(_){}}));
+  const load=(key,def)=>{if(key in srv)return JSON.parse(JSON.stringify(srv[key]));try{return JSON.parse(localStorage.getItem(key)||def)}catch(_){return JSON.parse(def)}};
+  const store=(key,v)=>{try{localStorage.setItem(key,JSON.stringify(v))}catch(_){}post(key,v)};
+  // Remembered on the server (see above), mirrored in this browser.
+  const HKEY='ski-hidden-trips',BKEY='ski-trip-book2',CKEY='ski-trip-confirmed',NKEY='ski-trip-notes';
+  let nights=load('ski-trip-nights','{}'),hidden=load(HKEY,'[]'),book=load(BKEY,'{}'),conf=load(CKEY,'{}'),notes=load(NKEY,'{}');
+  let showAll=false;
+  // One "going?" answer per person per trip, since schedules differ. A trip
+  // marked booked in trips.json starts as Yes for everyone and a click overrides it.
+  const isBooked=(t,w)=>book[t.id]&&w in book[t.id]?!!book[t.id][w]:!!t.booked;
+  const bookCell=(t,w)=>{const y=isBooked(t,w);return `<td><label style="white-space:nowrap;cursor:pointer"><input type="checkbox" data-book="${esc(t.id)}" data-who="${esc(w)}"${y?' checked':''}> <span style="color:${y?'var(--good)':'var(--muted)'}">${y?'Yes':'No'}</span></label></td>`};
+  function draw(){
+    const rows=list.filter(t=>t.checkout>=today);
+    const nHidden=rows.filter(t=>hidden.includes(t.id)).length;
+    el.classList.remove('muted');
+    el.innerHTML=`<table><thead><tr><th>Trip</th><th>Nights</th><th>Pass</th><th>In</th>${people.map(p=>`<th>${esc(p.label||p.id)} going?</th>`).join('')}<th>Booking confirmed details</th><th>Notes</th><th></th></tr></thead><tbody>${rows.filter(t=>showAll||!hidden.includes(t.id)).map(t=>{
+      // A weekend can be cut to one night (for example when only some of you can go):
+      // 1a = Fri night, ski Sat; 1b = Sat night, ski Sun. Booked rows keep their dates.
+      const pick=t.kind==='weekend'&&!t.booked?(nights[t.id]||'2'):'2';
+      const ci=pick==='1b'?add(t.checkin,1):t.checkin,co=pick==='1a'?add(t.checkin,1):t.checkout;
+      const ski=[];for(let k=add(ci,1);k<=co;k=add(k,1))ski.push(k);
+      const bad=ski.filter(isBlack);
+      const days=Math.ceil((Date.parse(ci)-Date.parse(today))/864e5);
+      const isH=hidden.includes(t.id);
+      const pass=bad.length?`<span class="soon" title="${bad.map(nice).join(', ')}">✕ ${bad.length===ski.length?(ski.length>1?'all days':nice(bad[0])):bad.map(nice).join(', ')}</span>`:'<span style="color:var(--good)">OK</span>';
+      return `<tr style="${t.kind==='holiday'?'background:rgba(var(--snow),.10);':''}${isH?'opacity:.45':''}"><td><b>${esc(t.kind==='holiday'?t.label:'Weekend')}</b>${t.note?`<div class="muted">${esc(t.note)}</div>`:''}</td><td>${nice(ci)} → ${nice(co)}${t.kind==='weekend'&&!t.booked?`<div><select class="nights" data-nights="${esc(t.id)}"><option value="2"${pick==='2'?' selected':''}>2 nights</option><option value="1a"${pick==='1a'?' selected':''}>1 night, ski Sat</option><option value="1b"${pick==='1b'?' selected':''}>1 night, ski Sun</option></select></div>`:''}</td><td>${pass}</td><td class="muted">${days<=0?'now':days+' days'}</td>${people.map(p=>bookCell(t,p.id)).join('')}<td>${t.confirmed?`<div class="muted" style="text-align:left;margin-bottom:5px">${esc(t.confirmed)}</div>`:''}<textarea class="note" rows="2" data-conf="${esc(t.id)}" placeholder="Hotel, confirmation #, price, pay at booking or property, free-cancel date…">${esc(conf[t.id]||'')}</textarea></td><td><textarea class="note" rows="2" data-note="${esc(t.id)}" placeholder="Add a note…">${esc(notes[t.id]||'')}</textarea></td><td><button type="button" class="tab" data-id="${esc(t.id)}">${isH?'Unhide':'Hide'}</button></td></tr>`}).join('')}</tbody></table><p class="muted">Pass column uses the ${esc(passName)} blackout dates above. ${nHidden?`<button type="button" class="tab" id="togglehidden">${showAll?'Hide the '+nHidden+' hidden again':'Show '+nHidden+' hidden'}</button>`:''}</p>`;
+    el.querySelectorAll('select[data-nights]').forEach(x=>x.onchange=()=>{if(x.value==='2')delete nights[x.dataset.nights];else nights[x.dataset.nights]=x.value;store('ski-trip-nights',nights);draw()});
+    el.querySelectorAll('button[data-id]').forEach(b=>b.onclick=()=>{const id=b.dataset.id;hidden=hidden.includes(id)?hidden.filter(x=>x!==id):hidden.concat(id);store(HKEY,hidden);draw()});
+    el.querySelectorAll('input[data-book]').forEach(x=>x.onchange=()=>{(book[x.dataset.book]=book[x.dataset.book]||{})[x.dataset.who]=x.checked;store(BKEY,book);draw()});
+    el.querySelectorAll('textarea[data-conf]').forEach(x=>x.oninput=()=>{if(x.value.trim())conf[x.dataset.conf]=x.value;else delete conf[x.dataset.conf];store(CKEY,conf)});
+    el.querySelectorAll('textarea[data-note]').forEach(x=>x.oninput=()=>{if(x.value.trim())notes[x.dataset.note]=x.value;else delete notes[x.dataset.note];store(NKEY,notes)});
+    const th=$('togglehidden');if(th)th.onclick=()=>{showAll=!showAll;draw()};
+  }
+  draw();
+}
+
+// Which hotels, condos and rentals are worth considering. Filter by area or
+// points program; prices are looked up per trip, so none are listed here.
+let lodgingArea='All';
+async function lodging(){
+  const el=$('lodging');
+  const d=await getJSON(BASE+'lodging.json');
+  if(d.title)$('lodgingtitle').textContent=d.title;
+  const areas=['All',...new Set(d.places.map(p=>p.area.replace(/ \(.*/,'')))];
+  const progs=[...new Set(d.places.map(p=>p.program).filter(Boolean))];
+  const filters=[...areas,...progs.map(p=>p+' points')];
+  const show=p=>lodgingArea==='All'||(lodgingArea.endsWith(' points')?p.program===lodgingArea.replace(' points',''):p.area.startsWith(lodgingArea));
+  el.classList.remove('muted');
+  el.innerHTML=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${filters.map(f=>`<button type="button" class="tab" data-f="${esc(f)}" aria-pressed="${f===lodgingArea}">${esc(f)}</button>`).join('')}</div>
+  <table><thead><tr><th>Place</th><th>Type</th><th>Area</th><th>Getting to the lift</th><th>Points</th><th>Pay and cancel</th><th>Note</th></tr></thead><tbody>${d.places.filter(show).map(p=>`<tr><td style="text-align:left">${p.link?`<a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.name)}</a>`:esc(p.name)}</td><td>${esc(p.type)}</td><td>${esc(p.area)}</td><td style="text-align:left">${esc(p.lift)}</td><td>${esc(p.program||'–')}</td><td style="text-align:left" class="${p.pay==='To check'?'muted':''}">${esc(p.pay)}</td><td class="muted" style="text-align:left">${esc(p.note)}</td></tr>`).join('')}</tbody></table>
+  <p class="muted">${d.notes.map(esc).join(' ')} Checked ${esc(d.checked)}.</p>`;
+  el.querySelectorAll('button[data-f]').forEach(b=>b.onclick=()=>{lodgingArea=b.dataset.f;lodging().catch(fail('lodging'))});
+}
+
+// Real quotes for a weekend, grouped by category (inside the valley first).
+// Only weekends that have been checked appear here; see prices.json.
+async function prices(){
+  const el=$('prices');
+  const [p,list]=await Promise.all([getJSON(BASE+'prices.json'),getJSON(BASE+'trips.json')]);
+  const usd=n=>n==null?'–':'$'+n.toLocaleString('en-US',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+  if(!Object.keys(p).length){el.textContent='No prices looked up yet. Ask the agent to search hotels for a weekend.';return}
+  el.classList.remove('muted');
+  let hid=[];try{const r=await getJSON('/api/apps/data?app=ski&key=ski-hidden-trips');hid=Array.isArray(r.value)?r.value:JSON.parse(localStorage.getItem('ski-hidden-trips')||'[]')}catch(_){try{hid=JSON.parse(localStorage.getItem('ski-hidden-trips')||'[]')}catch(_){}}
+  el.innerHTML=Object.keys(p).sort().filter(id=>!hid.includes(id)).map(id=>{
+    const w=p[id],t=list.find(x=>x.id===id)||{checkin:id,checkout:id};
+    return `<h2>${nice(t.checkin)} → ${nice(t.checkout)}</h2><p class="muted">${esc(w.guests)}. Checked ${esc(w.checked)}; rates change, so re-check before booking.${w.rules?'<br><b>'+esc(w.rules)+'</b>':''}</p>`+w.categories.map(c=>`<h2 style="font-size:13px;color:var(--muted)">${esc(c.name)}</h2><table><thead><tr><th>Place</th><th>Room</th><th>Nightly (Fri, Sat)</th><th>Total</th><th>Pay and cancel</th></tr></thead><tbody>${[...c.options.filter(o=>!o.out),...c.options.filter(o=>o.out)].map(o=>o.out?`<tr style="opacity:.5"><td style="text-align:left">${esc(o.place)}${o.pets?`<div class="muted">🐾 ${esc(o.pets)}</div>`:''}${o.prox?`<div class="muted">📍 ${esc(o.prox)}</div>`:''}${o.room?`<div class="muted">${esc(o.room)}</div>`:''}</td><td colspan="4" class="muted" style="text-align:left">Ruled out: ${esc(o.out)}</td></tr>`:o.total==null?`<tr><td style="text-align:left">${esc(o.place)}${o.pets?`<div class="muted">🐾 ${esc(o.pets)}</div>`:''}${o.prox?`<div class="muted">📍 ${esc(o.prox)}</div>`:''}</td><td colspan="4" class="muted" style="text-align:left">${esc(o.status)}</td></tr>`:`<tr><td style="text-align:left">${o.link?`<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.place)}</a>`:esc(o.place)}${o.pets?`<div class="muted">🐾 ${esc(o.pets)}</div>`:''}${o.prox?`<div class="muted">📍 ${esc(o.prox)}</div>`:''}</td><td style="text-align:left">${esc(o.room)}</td><td>${(o.nightly||[]).map(usd).join(', ')}</td><td><b>${usd(o.total)}</b></td><td style="text-align:left">${esc(o.pay)}<div class="muted">${esc(o.cancel)}</div><div class="muted">${esc(o.note||'')}</div></td></tr>`).join('')}</tbody></table>`).join('');
+  }).join('');
+}
+
+const fail=id=>e=>{$(id).textContent='Could not load this section.';console.error(e)};
+parts().catch(fail('parts'));
+// Reloads only the left-hand dashboard sections; the agent panel on the
+// right is left alone so an open conversation is not interrupted.
+let refreshing=false;
+async function refresh(){
+  if(refreshing)return;refreshing=true;
+  const b=$('refresh');b.disabled=true;b.textContent='↻ Refreshing…';
+  try{
+    await pass().catch(fail('pass'));
+    await Promise.all([snow().catch(fail('snow')),trips().catch(fail('trips')),lodging().catch(fail('lodging')),prices().catch(fail('prices')),hotels().catch(fail('hotels'))]);
+    b.textContent='↻ Refreshed '+new Date().toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+  }finally{b.disabled=false;refreshing=false}
+}
+// Refresh re-downloads this page itself, swaps in the new left-hand sections
+// and re-runs its script, so new tables and code show up. The agent panel and
+// the Routines cards (added by the shared shell) are not touched.
+async function reloadPage(){
+  const b=$('refresh');b.disabled=true;b.textContent='↻ Reloading…';
+  try{
+    const r=await fetch(location.pathname+'?_='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(20000)});
+    if(!r.ok)throw new Error('page '+r.status);
+    const doc=new DOMParser().parseFromString(await r.text(),'text/html');
+    const code=[...doc.querySelectorAll('script:not([src])')].map(x=>x.textContent).join('\n');
+    const main=document.getElementById('dash'),fresh=doc.getElementById('dash');
+    if(!code||!main||!fresh)throw new Error('page shape');
+    // Validate the downloaded script before replacing working controls.
+    const run=new Function(code);
+    [...main.children].filter(e=>!e.hasAttribute('data-ccc-routines')).forEach(e=>e.remove());
+    const rt=main.querySelector('[data-ccc-routines]');
+    [...fresh.children].filter(e=>!e.hasAttribute('data-ccc-routines')).forEach(e=>main.insertBefore(document.importNode(e,true),rt));
+    // Keep declarations local so refresh can run repeatedly.
+    run();
+  }catch(e){
+    const retry=$('refresh');
+    retry.disabled=false;retry.textContent='↻ Retry refresh';
+    retry.title='Refresh failed or timed out. Your current page is still open; click to try again.';
+    console.error('Ski refresh failed',e);
+  }
+}
+$('refresh').onclick=reloadPage;
+refresh().then(()=>{$('refresh').textContent='↻ Refresh'});
+</script></body></html>

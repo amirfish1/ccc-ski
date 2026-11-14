@@ -1,0 +1,8 @@
+# Created on each person's machine; never shared.
+.venv/
+__pycache__/
+ski/data/
+ski/ccc-state.json
+ski/preview.png
+ski/.claude/
+*.tmp

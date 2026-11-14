@@ -1,0 +1,211 @@
+{
+  "checked": "2026-11-13",
+  "notes": [
+    "Distances are from the Palisades Tahoe travel guide: Truckee 12 mi, Tahoe City 4.5 mi, Incline Village 16 mi.",
+    "Prices are not included; look them up per trip. 'To check' means pay timing and cancellation are not known yet.",
+    "Mountaineer is the free on-demand shuttle inside Olympic Valley, 7 am to 11 pm."
+  ],
+  "places": [
+    {
+      "name": "The Village at Palisades Tahoe Hotel",
+      "type": "Hotel",
+      "area": "Olympic Valley",
+      "lift": "Steps from the Funitel and Red Dog; ski-out, walk back",
+      "program": "",
+      "pay": "To check",
+      "note": "Kitchens, fireplaces and balconies; 8 outdoor hot tubs and underground parking. Check-in 4 pm. Costs the most.",
+      "link": "https://www.palisadestahoe.com/plan-your-visit/lodging"
+    },
+    {
+      "name": "Palisades Tahoe Lodge (was Squaw Valley Lodge)",
+      "type": "Condo",
+      "area": "Olympic Valley",
+      "lift": "Ski-in/ski-out between the two gondolas; 5 min walk to the tram",
+      "program": "",
+      "pay": "To check",
+      "note": "218 owner-owned condos, studios to 3 bedrooms, so decor and price vary by owner. Rented through the lodge's rental company and also on Airbnb.",
+      "link": "https://laketahoetraveltips.com/palisades-tahoe-lodge/"
+    },
+    {
+      "name": "Red Wolf Lodge",
+      "type": "Condo",
+      "area": "Olympic Valley",
+      "lift": "Steps from Red Dog chair; 5 min walk to the Village",
+      "program": "",
+      "pay": "To check",
+      "note": "Ski-in/ski-out condos with kitchens, fireplaces, hot tub and covered parking. Guests get lift-ticket discounts.",
+      "link": "https://www.redwolfolympicvalley.com/wake-up-where-the-slopes-begin/"
+    },
+    {
+      "name": "Everline Resort & Spa",
+      "type": "Hotel",
+      "area": "Olympic Valley",
+      "lift": "Ski-in/ski-out by its own chairlift; far end from the Village",
+      "program": "Hyatt",
+      "pay": "Points at booking, plus a 1-night card deposit",
+      "note": "Hyatt Category 8. Closed Nov 2-23, 2026, reopens before Thanksgiving. Shuttle to the Village.",
+      "link": "https://www.everlineresort.com/"
+    },
+    {
+      "name": "PlumpJack Inn",
+      "type": "Hotel",
+      "area": "Olympic Valley",
+      "lift": "Reddit: closest to the tram",
+      "program": "",
+      "pay": "1 night + tax charged at booking",
+      "note": "55 rooms. Free cancel until 6 pm 7 days before check-in (14 days on holidays), then you lose the deposit.",
+      "link": "https://www.plumpjackinn.com/"
+    },
+    {
+      "name": "Olympic Village Inn",
+      "type": "Condo",
+      "area": "Olympic Valley",
+      "lift": "About a 5 min walk to the lifts, plus free shuttle",
+      "program": "",
+      "pay": "To check",
+      "note": "Condo-style units, pool, hot tubs. Reddit says it is the furthest of the base-area lodges.",
+      "link": "https://www.airbnb.com/rooms/29684387"
+    },
+    {
+      "name": "Tavern Inn condos",
+      "type": "Condo",
+      "area": "Olympic Valley",
+      "lift": "Short walk or shuttle; not ski-in",
+      "program": "",
+      "pay": "To check",
+      "note": "Budget-friendlier, roomy layouts, fireplaces, pool and hot tub.",
+      "link": null
+    },
+    {
+      "name": "Everline suites and Ridge Court townhomes (Marriott Homes & Villas)",
+      "type": "Rental",
+      "area": "Olympic Valley",
+      "lift": "Everline suites are ski-in/ski-out; Ridge Court is 5 min by car",
+      "program": "Marriott",
+      "pay": "To check",
+      "note": "Marriott lists some Everline suites (sleep 4) and Ridge Court townhomes (3 bedrooms, 6 guests). Ask whether Bonvoy points work on these.",
+      "link": "https://homes-and-villas.marriott.com/en/properties/40602543-olympic-valley-ridge-court-14-at-palisades-tahoe"
+    },
+    {
+      "name": "Valley View Townhome #10 (VRBO)",
+      "type": "Rental",
+      "area": "Olympic Valley",
+      "lift": "10 min walk, or 3 min on the free Mountaineer shuttle",
+      "program": "",
+      "pay": "To check",
+      "note": "Townhome with ski racks and laundry.",
+      "link": "https://www.vrbo.com/4372512"
+    },
+    {
+      "name": "KT22 View (VRBO)",
+      "type": "Rental",
+      "area": "Olympic Valley",
+      "lift": "Half a mile to the tram; Mountaineer shuttle",
+      "program": "",
+      "pay": "To check",
+      "note": "3 bedrooms, sleeps 8, no pets.",
+      "link": "https://www.vrbo.com/4421027"
+    },
+    {
+      "name": "Cozy Mountain Chalet (Airbnb)",
+      "type": "Rental",
+      "area": "Olympic Valley",
+      "lift": "Mountaineer shuttle picks up at the door",
+      "program": "",
+      "pay": "To check",
+      "note": "3 bedrooms, wood stove, 10 min to Tahoe City.",
+      "link": "https://www.airbnb.com/rooms/1035136729596376654"
+    },
+    {
+      "name": "Basecamp Tahoe City",
+      "type": "Hotel",
+      "area": "Tahoe City (about 4.5 mi)",
+      "lift": "Drive, about 15-20 min; free shuttle or Park & Ride",
+      "program": "",
+      "pay": "To check",
+      "note": "About 8 mi by road per the hotel. Rates from about $154 on Kayak. Pet friendly.",
+      "link": "https://www.basecamphotels.com/tahoe-city"
+    },
+    {
+      "name": "Pepper Tree Inn",
+      "type": "Hotel",
+      "area": "Tahoe City (about 4.5 mi)",
+      "lift": "Drive, about 15-20 min",
+      "program": "",
+      "pay": "To check",
+      "note": "Reddit calls it the bargain hotel in Tahoe City.",
+      "link": null
+    },
+    {
+      "name": "evo Hotel Tahoe City",
+      "type": "Hotel",
+      "area": "Tahoe City (about 4.5 mi)",
+      "lift": "Drive, about 15-20 min",
+      "program": "",
+      "pay": "To check",
+      "note": "From about $179 on Kayak.",
+      "link": null
+    },
+    {
+      "name": "SpringHill Suites Truckee",
+      "type": "Hotel",
+      "area": "Truckee (about 12 mi)",
+      "lift": "Drive about 25 min on SR-89, longer in snow",
+      "program": "Marriott",
+      "pay": "Points at booking",
+      "note": "All-suite, free hot breakfast, heated pool.",
+      "link": "https://www.visittruckeetahoe.com/explore/inspiration-stories/welcome-to-truckee-hotels-inns-mountain-lodges"
+    },
+    {
+      "name": "Martis Valley Lodge (Tapestry by Hilton)",
+      "type": "Hotel",
+      "area": "Truckee (about 12 mi)",
+      "lift": "Within about 20 min of Palisades",
+      "program": "Hilton",
+      "pay": "To check",
+      "note": "109 rooms, fire pits, hot tub. Near the SR-267 side of Truckee.",
+      "link": "https://www.hilton.com/en/hotels/tkfupup-martis-valley-lodge-truckee/"
+    },
+    {
+      "name": "Hampton Inn and Home2 Suites Truckee",
+      "type": "Hotel",
+      "area": "Truckee (about 12 mi)",
+      "lift": "Drive about 25 min",
+      "program": "Hilton",
+      "pay": "To check",
+      "note": "Hilton lists 5 Hampton hotels and a Home2 Suites in the Truckee listing. Home2 has free breakfast and an indoor pool. I haven't verified which are closest.",
+      "link": "https://www.hilton.com/en/locations/usa/california/truckee/"
+    },
+    {
+      "name": "Best Western Plus Truckee-Tahoe Hotel",
+      "type": "Hotel",
+      "area": "Truckee (about 12 mi)",
+      "lift": "Drive about 25 min",
+      "program": "",
+      "pay": "To check",
+      "note": "Mid-range, about 4.3 stars.",
+      "link": null
+    },
+    {
+      "name": "Gravity Haus Truckee-Tahoe",
+      "type": "Hotel",
+      "area": "Truckee (about 12 mi)",
+      "lift": "Drive about 25 min",
+      "program": "",
+      "pay": "To check",
+      "note": "Highly rated, about 4.7 stars.",
+      "link": null
+    },
+    {
+      "name": "Hyatt Regency Lake Tahoe Resort, Spa and Casino",
+      "type": "Hotel",
+      "area": "Incline Village (16 mi)",
+      "lift": "Far; about 16 miles to Palisades",
+      "program": "Hyatt",
+      "pay": "To check",
+      "note": "Only worth it if Hyatt points make it nearly free. Not close to the lifts.",
+      "link": null
+    }
+  ],
+  "title": "Where to stay near Palisades"
+}
