@@ -5,7 +5,12 @@
 <title>Ski · CCC</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('ccc-theme')||'dark'}catch(_){}</script>
 <script src="/static/app-rail.js" defer></script>
-<script src="/static/app-kit.js" data-app="ski" defer></script>
+<script>
+// The app's id is its folder name, read from the address (/view/<id>), so the
+// app works whatever name it was installed under.
+window.APP_ID=(location.pathname.match(/^\/view\/([a-z0-9_-]+)/)||[])[1]||'ski';
+(function(){var s=document.createElement('script');s.src='/static/app-kit.js';s.dataset.app=window.APP_ID;document.head.appendChild(s)})();
+</script>
 <style>
 :root{--bg:#0f1115;--panel:#161a21;--line:#2b323d;--text:#edf0f5;--muted:#a8b2c2;--accent:#80b9ff;--good:#8bd8ac;--warn:#f5c67c;--bad:#ff8f8f;--snow:128,185,255}
 [data-theme="light"]{--bg:#f5f6f8;--panel:#fff;--line:#d9dee6;--text:#1a1f29;--muted:#5d6878;--accent:#1f6fd0;--good:#1c8a50;--warn:#a26200;--bad:#c62828;--snow:31,111,208}
@@ -54,7 +59,7 @@ textarea.note:focus{outline:none;border-color:var(--accent)}
 </main>
 <script>
 'use strict';
-const BASE='/app-static/ski/';
+const BASE='/app-static/'+APP_ID+'/';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const getJSON=async u=>{const r=await fetch(u,{cache:'no-store',signal:AbortSignal.timeout(20000)});if(!r.ok)throw new Error(u+' '+r.status);return r.json()};
@@ -135,8 +140,8 @@ async function trips(){
   // a key yet, this browser's old answer is uploaded once.
   const SKEYS=['ski-hidden-trips','ski-trip-book2','ski-trip-confirmed','ski-trip-notes','ski-trip-nights'];
   const srv={};
-  const post=(key,v)=>{try{fetch('/api/apps/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:'ski',key,value:v})}).catch(()=>{})}catch(_){}};
-  await Promise.all(SKEYS.map(async k=>{try{const r=await getJSON('/api/apps/data?app=ski&key='+k);
+  const post=(key,v)=>{try{fetch('/api/apps/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app:APP_ID,key,value:v})}).catch(()=>{})}catch(_){}};
+  await Promise.all(SKEYS.map(async k=>{try{const r=await getJSON('/api/apps/data?app='+APP_ID+'&key='+k);
     if(r.ok&&r.value!==null&&r.value!==undefined)srv[k]=r.value;
     else if(r.ok){const l=localStorage.getItem(k);if(l){try{post(k,JSON.parse(l))}catch(_){}}}}catch(_){}}));
   const load=(key,def)=>{if(key in srv)return JSON.parse(JSON.stringify(srv[key]));try{return JSON.parse(localStorage.getItem(key)||def)}catch(_){return JSON.parse(def)}};
@@ -200,7 +205,7 @@ async function prices(){
   const usd=n=>n==null?'–':'$'+n.toLocaleString('en-US',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
   if(!Object.keys(p).length){el.textContent='No prices looked up yet. Ask the agent to search hotels for a weekend.';return}
   el.classList.remove('muted');
-  let hid=[];try{const r=await getJSON('/api/apps/data?app=ski&key=ski-hidden-trips');hid=Array.isArray(r.value)?r.value:JSON.parse(localStorage.getItem('ski-hidden-trips')||'[]')}catch(_){try{hid=JSON.parse(localStorage.getItem('ski-hidden-trips')||'[]')}catch(_){}}
+  let hid=[];try{const r=await getJSON('/api/apps/data?app='+APP_ID+'&key=ski-hidden-trips');hid=Array.isArray(r.value)?r.value:JSON.parse(localStorage.getItem('ski-hidden-trips')||'[]')}catch(_){try{hid=JSON.parse(localStorage.getItem('ski-hidden-trips')||'[]')}catch(_){}}
   el.innerHTML=Object.keys(p).sort().filter(id=>!hid.includes(id)).map(id=>{
     const w=p[id],t=list.find(x=>x.id===id)||{checkin:id,checkout:id};
     return `<h2>${nice(t.checkin)} → ${nice(t.checkout)}</h2><p class="muted">${esc(w.guests)}. Checked ${esc(w.checked)}; rates change, so re-check before booking.${w.rules?'<br><b>'+esc(w.rules)+'</b>':''}</p>`+w.categories.map(c=>`<h2 style="font-size:13px;color:var(--muted)">${esc(c.name)}</h2><table><thead><tr><th>Place</th><th>Room</th><th>Nightly (Fri, Sat)</th><th>Total</th><th>Pay and cancel</th></tr></thead><tbody>${[...c.options.filter(o=>!o.out),...c.options.filter(o=>o.out)].map(o=>o.out?`<tr style="opacity:.5"><td style="text-align:left">${esc(o.place)}${o.pets?`<div class="muted">🐾 ${esc(o.pets)}</div>`:''}${o.prox?`<div class="muted">📍 ${esc(o.prox)}</div>`:''}${o.room?`<div class="muted">${esc(o.room)}</div>`:''}</td><td colspan="4" class="muted" style="text-align:left">Ruled out: ${esc(o.out)}</td></tr>`:o.total==null?`<tr><td style="text-align:left">${esc(o.place)}${o.pets?`<div class="muted">🐾 ${esc(o.pets)}</div>`:''}${o.prox?`<div class="muted">📍 ${esc(o.prox)}</div>`:''}</td><td colspan="4" class="muted" style="text-align:left">${esc(o.status)}</td></tr>`:`<tr><td style="text-align:left">${o.link?`<a href="${esc(o.link)}" target="_blank" rel="noopener">${esc(o.place)}</a>`:esc(o.place)}${o.pets?`<div class="muted">🐾 ${esc(o.pets)}</div>`:''}${o.prox?`<div class="muted">📍 ${esc(o.prox)}</div>`:''}</td><td style="text-align:left">${esc(o.room)}</td><td>${(o.nightly||[]).map(usd).join(', ')}</td><td><b>${usd(o.total)}</b></td><td style="text-align:left">${esc(o.pay)}<div class="muted">${esc(o.cancel)}</div><div class="muted">${esc(o.note||'')}</div></td></tr>`).join('')}</tbody></table>`).join('');
