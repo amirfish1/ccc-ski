@@ -32,6 +32,20 @@ tell the owner its one-line reason).
 - The page redraws by itself a few seconds after you change a file. Do not
   tell the owner to refresh.
 
+## How the page is laid out
+
+The page is one thing: the Weekends table. Keep it that way.
+
+- One clean line per weekend. A click on a row opens its details (nights,
+  booking text, notes, hide).
+- "Still to book" is a single line above the table that opens into the list.
+- Everything else (prices, where to stay, pass dates, hotel bookings,
+  routines) is a closed fold under the table. A new section goes there too, as
+  another `<details class="fold">` drawn inside a `fold('<id>', draw)` call.
+  Do not add always-open sections, status tiles or cards above the table.
+- Read data with `getJSON(url)`. It reads each file once and keeps a copy in
+  the browser so the page draws at once. Do not add a refresh button.
+
 ## The files
 
 | File | What it holds |
@@ -44,7 +58,7 @@ tell the owner its one-line reason).
 | `pass.json` | Pass name, `blackouts` (`from`/`to` dates), `source` link, `confirmed` |
 | `resorts.json` | Resort name and its US weather service grid, for the snow forecast |
 | `areas.json` | Search areas for `hotel_search.py` |
-| `app.json` | The app's name, the tiles at the top of the page (`topic.parts`), suggestions and routines |
+| `app.json` | The app's name, suggestions and routines |
 | `index.html` | The page itself |
 | `data/` | The owner's ticks, notes and hidden rows from the page. Do not edit by hand |
 
@@ -57,7 +71,7 @@ Dates are always `YYYY-MM-DD`.
 Edit that row's `checkin` and `checkout` in `trips.json`. Keep its `id` the
 same, because the owner's ticks and notes are stored under it. To add a trip,
 add a row whose `id` is its check-in date. To drop one, delete the row (or
-tell the owner about the Hide button on the page).
+tell the owner about "Hide this weekend" in the row's details on the page).
 
 ### 2. Change who is going
 
@@ -146,9 +160,8 @@ The key is the trip's `id`. An option with `"out": "reason"` shows as ruled out.
   pass's own page.
 - `lodging.json`: replace the places and the `title`. `areas.json`: new search
   areas (a Google Hotels query and an Airbnb map box each).
-- `app.json`: update the tile texts under `topic.parts` and, if the owner is
-  in another time zone, `tz`. Also change `TZ` near the top of the script in
-  `index.html`.
+- `app.json`: if the owner is in another time zone, `tz`. Also change `TZ`
+  near the top of the script in `index.html`.
 
 ## Routines
 

@@ -2,46 +2,6 @@
   "label": "Ski",
   "icon": "⛷",
   "tz": "America/Los_Angeles",
-  "topic": {
-    "parts": [
-      {
-        "id": "snow",
-        "label": "Snow forecast",
-        "status": "live",
-        "how": "Palisades Tahoe, from the US weather service, each time you open this page"
-      },
-      {
-        "id": "pass",
-        "label": "Pass blackout dates",
-        "status": "live",
-        "how": "Ikon Base Pass dates for this season; confirm them on the pass page"
-      },
-      {
-        "id": "trips",
-        "label": "Trip dates",
-        "status": "live",
-        "how": "Every weekend to the end of April plus Thanksgiving, Christmas, MLK and February ski week"
-      },
-      {
-        "id": "lodging",
-        "label": "Where to stay",
-        "status": "live",
-        "how": "20 hotels, condos and rentals near Palisades, filterable by area and points program"
-      },
-      {
-        "id": "search",
-        "label": "Hotel search",
-        "status": "todo",
-        "how": "Installs itself the first time the app runs. Then ask the agent to search a weekend."
-      },
-      {
-        "id": "cancel",
-        "label": "Cancel reminders",
-        "status": "live",
-        "how": "The Hotel Canceller checks every morning once you record a booking"
-      }
-    ]
-  },
   "suggestions": [
     {
       "label": "Change a weekend's dates",
