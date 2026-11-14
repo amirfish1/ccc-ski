@@ -7,6 +7,10 @@ Creates .venv next to this file and installs two open source libraries:
 Nothing is installed outside this folder. Safe to run again: when the tools
 are already there it changes nothing.
 
+When the computer has no Python new enough (a Mac's built-in one is 3.9), it
+downloads `uv` (an open source Python installer, https://docs.astral.sh/uv/)
+into .tools/ in this folder and lets it fetch a private Python there.
+
 Runs as the app's "Setup" routine. The last line printed is JSON for the
 routine card; a non-zero exit with a one-line reason shows as failed.
 
@@ -17,12 +21,16 @@ import os
 import shutil
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 VENV = HERE / ".venv"
+TOOLS = HERE / ".tools"
 PACKAGES = ["stays", "pyairbnb"]
 MIN = (3, 10)
+UV_INSTALLER = "https://astral.sh/uv/install.sh"
+UV_PYTHON = "3.12"
 
 
 def fail(reason):
@@ -64,6 +72,55 @@ def find_python():
     return None
 
 
+def uv_env():
+    """Keep everything uv downloads inside this app's folder."""
+    env = dict(os.environ)
+    env["UV_INSTALL_DIR"] = str(TOOLS / "bin")
+    env["UV_NO_MODIFY_PATH"] = "1"
+    env["UV_PYTHON_INSTALL_DIR"] = str(TOOLS / "python")
+    env["UV_CACHE_DIR"] = str(TOOLS / "cache")
+    return env
+
+
+def find_uv():
+    for exe in (TOOLS / "bin" / "uv", shutil.which("uv")):
+        if exe and os.path.exists(str(exe)):
+            return str(exe)
+    return None
+
+
+def get_uv():
+    """uv from this folder or the machine; otherwise download it into .tools/."""
+    uv = find_uv()
+    if uv:
+        return uv
+    if os.name == "nt":
+        fail("Hotel search needs Python 3.10 or newer. Install Python from python.org, then press Run now.")
+    try:
+        # The site refuses Python's default client name.
+        req = urllib.request.Request(UV_INSTALLER, headers={"User-Agent": "curl/8.0"})
+        script = urllib.request.urlopen(req, timeout=60).read()
+    except Exception as e:
+        fail("Could not download the Python installer (is the internet on?): %s" % e)
+    TOOLS.mkdir(exist_ok=True)
+    done = subprocess.run(["sh", "-s"], input=script, capture_output=True, env=uv_env())
+    uv = find_uv()
+    if done.returncode != 0 or not uv:
+        tail = [ln for ln in done.stderr.decode("utf-8", "replace").splitlines() if ln.strip()]
+        fail("Could not install the Python installer: " + (tail[-1] if tail else "unknown error")[:200])
+    return uv
+
+
+def make_venv_with_uv():
+    uv = get_uv()
+    made = subprocess.run([uv, "venv", "--quiet", "--python", UV_PYTHON, str(VENV)],
+                          capture_output=True, text=True, env=uv_env())
+    if made.returncode != 0:
+        tail = [ln for ln in (made.stderr or made.stdout).splitlines() if ln.strip()]
+        fail("Could not set up a newer Python: " + (tail[-1] if tail else "uv failed")[:200])
+    return uv
+
+
 def tools_ready():
     py = venv_python()
     if not py.exists():
@@ -98,24 +155,30 @@ def main():
         print(json.dumps({"summary": "Hotel search tools are already installed."}))
         return
 
-    python = find_python()
-    if not python:
-        fail("Hotel search needs Python 3.10 or newer and this computer has %d.%d. "
-             "Install Python from python.org, then press Run now."
-             % (sys.version_info[0], sys.version_info[1]))
+    python = None if os.environ.get("SKI_SETUP_NO_SYSTEM_PYTHON") else find_python()
 
     # A half-built or too-old .venv is replaced rather than repaired.
     if VENV.exists() and (version_of(venv_python()) or (0, 0)) < MIN:
         shutil.rmtree(str(VENV), ignore_errors=True)
+    uv = None
     if not venv_python().exists():
-        made = subprocess.run([python, "-m", "venv", str(VENV)], capture_output=True, text=True)
-        if made.returncode != 0:
-            tail = (made.stderr or made.stdout).strip().splitlines()
-            fail("Could not create the tools folder: " + (tail[-1] if tail else "venv failed"))
+        if python:
+            made = subprocess.run([python, "-m", "venv", str(VENV)], capture_output=True, text=True)
+            if made.returncode != 0:
+                tail = (made.stderr or made.stdout).strip().splitlines()
+                fail("Could not create the tools folder: " + (tail[-1] if tail else "venv failed"))
+        else:
+            # No Python new enough on this computer: fetch a private one.
+            uv = make_venv_with_uv()
 
-    pip = subprocess.run(
-        [str(venv_python()), "-m", "pip", "install", "--quiet", "--disable-pip-version-check"] + PACKAGES,
-        capture_output=True, text=True)
+    if uv:  # a uv-made environment has no pip of its own
+        pip = subprocess.run(
+            [uv, "pip", "install", "--quiet", "--python", str(venv_python())] + PACKAGES,
+            capture_output=True, text=True, env=uv_env())
+    else:
+        pip = subprocess.run(
+            [str(venv_python()), "-m", "pip", "install", "--quiet", "--disable-pip-version-check"] + PACKAGES,
+            capture_output=True, text=True)
     if pip.returncode != 0:
         tail = [ln for ln in (pip.stderr or pip.stdout).splitlines() if ln.strip()]
         fail("Could not download the hotel search tools (is the internet on?): "
@@ -123,6 +186,7 @@ def main():
     if not tools_ready():
         fail("The hotel search tools installed but will not load. Delete the .venv folder and run Setup again.")
 
+    shutil.rmtree(str(TOOLS / "cache"), ignore_errors=True)  # download leftovers
     mark_search_live()
     print(json.dumps({"summary": "Installed the hotel search tools (Google Hotels and Airbnb)."}))
 

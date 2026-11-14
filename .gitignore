@@ -1,5 +1,6 @@
 # Created on each person's machine; never shared.
 .venv/
+.tools/
 __pycache__/
 ski/data/
 ski/ccc-state.json

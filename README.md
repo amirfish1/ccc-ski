@@ -19,23 +19,25 @@ It never logs in, books or pays. It finds options and links; you book.
 
 ## Install
 
-You need [Claude Command Center](https://github.com/amirfish1/claude-command-center)
-running, and an agent it can start (Claude Code, for example).
-
-Copy the `ski` folder into CCC's apps folder. The folder must be named `ski`.
+One line installs Claude Command Center, adds Ski and opens it. The rest of
+Claude Command Center stays out of the way behind a "More" button.
 
 ```bash
-mkdir -p ~/.claude/command-center/apps
-cp -R ski ~/.claude/command-center/apps/ski
+curl -fsSL https://raw.githubusercontent.com/amirfish1/claude-command-center/main/scripts/install.sh | CCC_APP=OWNER/ccc-ski bash
 ```
 
-Reload CCC and open **Ski** in the left rail.
+Already have Claude Command Center? Run `ccc app install OWNER/ccc-ski --focus`
+(leave out `--focus` to keep your usual view).
+
+You also need an agent it can start, for example Claude Code. The page works
+without one; the agent is what changes it for you.
 
 The first time it runs, the Setup routine installs two open source search
-tools into the app's own folder (`ski/.venv`): `stays` (Google Hotels) and
-`pyairbnb` (Airbnb). Nothing is installed anywhere else. Hotel search needs
-Python 3.10 or newer; a Mac's built-in Python is older, so install Python from
-python.org first if Setup says so. Everything else works without it.
+tools into the app's own folder: `stays` (Google Hotels) and `pyairbnb`
+(Airbnb). They need Python 3.10 or newer. If the computer's Python is older
+(a Mac's built-in one is), Setup downloads a private Python into the same
+folder with `uv`. Nothing is installed anywhere else, and everything except
+hotel search works without it.
 
 ## Your data stays on your machine
 

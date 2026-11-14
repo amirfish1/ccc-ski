@@ -17,7 +17,8 @@ February ski week. Say so in one line, then ask:
 
 Then make those changes. If the `.venv` folder is missing, run
 `python3 setup.py` first (it installs the hotel search tools into this folder
-and needs Python 3.10 or newer; if it fails, tell the owner its one-line reason).
+and fetches a newer Python by itself when the computer's is too old; if it fails,
+tell the owner its one-line reason).
 
 ## Hard rules
 
