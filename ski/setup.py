@@ -121,6 +121,15 @@ def make_venv_with_uv():
     return uv
 
 
+def tools_python_works():
+    """True when the new environment has a Python that can run pip."""
+    py = venv_python()
+    if not py.exists():
+        return False
+    check = subprocess.run([str(py), "-m", "pip", "--version"], capture_output=True, text=True)
+    return check.returncode == 0
+
+
 def tools_ready():
     py = venv_python()
     if not py.exists():
@@ -164,9 +173,12 @@ def main():
     if not venv_python().exists():
         if python:
             made = subprocess.run([python, "-m", "venv", str(VENV)], capture_output=True, text=True)
-            if made.returncode != 0:
-                tail = (made.stderr or made.stdout).strip().splitlines()
-                fail("Could not create the tools folder: " + (tail[-1] if tail else "venv failed"))
+            if made.returncode != 0 or not tools_python_works():
+                # Debian and Ubuntu ship Python without the venv add-on, and a
+                # failed attempt leaves a half-built folder. Start clean and
+                # fetch a private Python instead of asking for a system install.
+                shutil.rmtree(str(VENV), ignore_errors=True)
+                uv = make_venv_with_uv()
         else:
             # No Python new enough on this computer: fetch a private one.
             uv = make_venv_with_uv()
