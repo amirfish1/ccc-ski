@@ -254,4 +254,14 @@ async function reloadPage(){
 }
 $('refresh').onclick=reloadPage;
 refresh().then(()=>{$('refresh').textContent='↻ Refresh'});
+// The page keeps itself current: CCC says when one of this app's files
+// changed (the agent edited data, a routine wrote a result) and the matching
+// sections redraw, so nobody has to press Refresh.
+window.removeEventListener('ccc:app-changed',window.__skiChanged);
+window.__skiChanged=e=>{
+  if(e.detail&&e.detail.page){reloadPage();return}
+  parts().catch(fail('parts'));
+  refresh().then(()=>{$('refresh').textContent='↻ Refresh'});
+};
+window.addEventListener('ccc:app-changed',window.__skiChanged);
 </script></body></html>

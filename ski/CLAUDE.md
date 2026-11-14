@@ -29,8 +29,8 @@ tell the owner its one-line reason).
 - Only state a free-cancellation date you actually read (from
   `hotel_search.py details` or the listing page). Otherwise say "check the
   listing".
-- After changing a file, tell the owner to press **↻ Refresh** at the top of
-  the page.
+- The page redraws by itself a few seconds after you change a file. Do not
+  tell the owner to refresh.
 
 ## The files
 
