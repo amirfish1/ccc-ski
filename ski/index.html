@@ -66,10 +66,14 @@ tr.trip:hover>td{background:var(--hover)}
 tr.trip.open>td{border-bottom-color:transparent}
 tr.trip.hid{opacity:.45}
 td.when b{font-weight:600}
-td.when .s{display:block;font-size:12.5px;color:var(--muted);max-width:360px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#trips>table{table-layout:fixed}
+#trips th.w-in{width:68px}#trips th.c{width:66px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#trips th.w-bk{width:31%}#trips th.w-x{width:40px}
+td.when{overflow:hidden}
+td.when .s{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag.black{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
 .tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:20px;font-size:11.5px;font-weight:600;background:rgba(var(--snow),.16);color:var(--accent);vertical-align:1px}
 td.in{color:var(--muted);white-space:nowrap}
-td.bk{max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.bk{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chev{background:none;border:0;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px;transition:transform .15s}
 tr.open .chev{transform:rotate(90deg)}
 .chev:focus-visible,.fold>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -108,7 +112,7 @@ ul.dates li:last-child{border-bottom:0}
 ul.dates li.past{color:var(--muted);text-decoration:line-through}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .chips .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
-@media(max-width:760px){#dash{padding:18px 14px 60px}.form{grid-template-columns:1fr}.strip .d{width:40px}}
+@media(max-width:760px){#dash{padding:18px 14px 60px}.form{grid-template-columns:1fr}.strip .d{width:40px}#trips th.w-in,#trips td.in,#trips th.w-bk,#trips td.bk{display:none}#trips th.c{width:56px}}
 </style></head>
 <body>
 <main id="dash" data-ccc-content>
@@ -292,9 +296,9 @@ async function trips(){
     need();
     const rows=list.filter(t=>t.checkout>=today);
     const nHidden=rows.filter(t=>hidden.includes(t.id)).length;
-    const cols=5+people.length;
+    const cols=4+people.length;
     el.classList.remove('muted');
-    el.innerHTML=`<table><thead><tr><th>When</th><th></th><th>Pass</th>${people.map(p=>`<th class="c">${esc(p.label||p.id)}</th>`).join('')}<th>Booking</th><th></th></tr></thead><tbody>${rows.filter(t=>showAll||!hidden.includes(t.id)).map(t=>{
+    el.innerHTML=`<table><thead><tr><th>When</th><th class="w-in"></th>${people.map(p=>`<th class="c">${esc(p.label||p.id)}</th>`).join('')}<th class="w-bk">Booking</th><th class="w-x"></th></tr></thead><tbody>${rows.filter(t=>showAll||!hidden.includes(t.id)).map(t=>{
       // A weekend can be cut to one night: 1a = first night, ski the next
       // day; 1b = second night, ski the last day. Booked rows keep their dates.
       const canCut=t.kind==='weekend'&&!t.booked;
@@ -304,12 +308,12 @@ async function trips(){
       const bad=ski.filter(isBlack);
       const days=Math.ceil((Date.parse(ci)-Date.parse(today))/864e5);
       const isH=hidden.includes(t.id),isOpen=openRows.has(t.id);
-      const passCell=bad.length?`<span class="soon" title="Pass blackout: ${bad.map(nice).join(', ')}">✕ ${bad.length===ski.length?(ski.length>1?'all days':nice(bad[0])):bad.map(nice).join(', ')}</span>`:'<span class="ok">OK</span>';
+      const passTag=bad.length?`<span class="tag black" title="Pass blackout: ${bad.map(nice).join(', ')}">Pass blackout${bad.length===ski.length?'':' '+bad.map(k=>nice(k).split(',')[0]).join(', ')}</span>`:'';
       const details=String(conf[t.id]||t.confirmed||'').split('\n')[0];
       const bk=t.booked||details?`<span class="ok">✓</span> ${esc(details||'Booked')}`:'<span class="muted">–</span>';
       const line=[t.note,notes[t.id]&&'✎ '+String(notes[t.id]).split('\n')[0]].filter(Boolean).join('  ·  ');
       const id=esc(t.id);
-      return `<tr class="trip${isH?' hid':''}${isOpen?' open':''}" data-row="${id}"><td class="when"><b>${nice(ci)} → ${nice(co)}</b>${t.kind==='holiday'?`<span class="tag">${esc(t.label)}</span>`:''}${line?`<span class="s">${esc(line)}</span>`:''}</td><td class="in">${days<=0?'now':'in '+days+' d'}</td><td>${passCell}</td>${people.map(p=>`<td class="c"><label class="tog" title="${esc(p.label||p.id)}: going?"><input type="checkbox" data-book="${id}" data-who="${esc(p.id)}"${going(t,p.id)?' checked':''} aria-label="${esc(p.label||p.id)} going, ${nice(ci)}"><span></span></label></td>`).join('')}<td class="bk">${bk}</td><td style="text-align:right"><button type="button" class="chev" data-open="${id}" aria-expanded="${isOpen}" aria-label="Details">›</button></td></tr>`+
+      return `<tr class="trip${isH?' hid':''}${isOpen?' open':''}" data-row="${id}"><td class="when"><b>${nice(ci)} → ${nice(co)}</b>${t.kind==='holiday'?`<span class="tag">${esc(t.label)}</span>`:''}${passTag}${line?`<span class="s">${esc(line)}</span>`:''}</td><td class="in">${days<=0?'now':'in '+days+' d'}</td>${people.map(p=>`<td class="c"><label class="tog" title="${esc(p.label||p.id)}: going?"><input type="checkbox" data-book="${id}" data-who="${esc(p.id)}"${going(t,p.id)?' checked':''} aria-label="${esc(p.label||p.id)} going, ${nice(ci)}"><span></span></label></td>`).join('')}<td class="bk">${bk}</td><td style="text-align:right"><button type="button" class="chev" data-open="${id}" aria-expanded="${isOpen}" aria-label="Details">›</button></td></tr>`+
         (isOpen?`<tr class="more${isH?' hid':''}"><td colspan="${cols}"><div class="form">
           <div><label for="c-${id}">Booking details</label>${t.confirmed?`<div class="muted" style="margin-bottom:6px;font-size:13px">${esc(t.confirmed)}</div>`:''}<textarea class="note" rows="2" id="c-${id}" data-conf="${id}" placeholder="Hotel, confirmation #, price, pay at booking or property, free-cancel date…">${esc(conf[t.id]||'')}</textarea></div>
           <div><label for="n-${id}">Notes</label><textarea class="note" rows="2" id="n-${id}" data-note="${id}" placeholder="Add a note…">${esc(notes[t.id]||'')}</textarea></div>
